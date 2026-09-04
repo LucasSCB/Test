@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floresta dos Dados — Batalha D20</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game">
+
+    <!-- ═══════════════ SIDEBAR ESQUERDA — RANKING ════════════════ -->
+    <aside class="rank-panel">
+      <div class="rank-title">🏆 RANK DA FLORESTA</div>
+      <div id="rankList" class="rank-list"></div>
+      <div class="rank-footer">Vitórias registradas neste navegador</div>
+    </aside>
+
+    <!-- ═══════════════ CONTEÚDO CENTRAL ════════════════════════ -->
+    <div class="content-wrap">
+
+      <!-- ===== SETUP SCREEN ===== -->
+      <section id="setup" class="screen active">
+        <div class="title">
+          <span class="eyebrow">⚔ RPG • FLORESTA DOS DADOS</span>
+          <h1>Entre na arena</h1>
+          <p>Escolha o modo de jogo e enfrente o adversário em uma batalha por turnos.</p>
+        </div>
+
+        <!-- Wallet display -->
+        <div class="wallet-bar">
+          <span>🪙 <span id="walletDisplay">0</span> moedas</span>
+          <button class="shop-open-btn" onclick="openShop()">🛒 Loja</button>
+        </div>
+
+        <!-- Mode selector -->
+        <div class="mode-select">
+          <button class="mode-btn active" id="modePve" onclick="selectMode('pve')">
+            <span>⚔️</span>
+            <b>Torre PvE</b>
+            <small>4 inimigos + Boss</small>
+          </button>
+          <button class="mode-btn" id="modePvp" onclick="selectMode('pvp')">
+            <span>👥</span>
+            <b>2 Jogadores</b>
+            <small>Você vs Amigo (local)</small>
+          </button>
+        </div>
+
+        <!-- PvE setup -->
+        <div id="pveSetup" class="setup-block">
+          <div class="nickname-box">
+            <label for="nickname">SEU NICKNAME</label>
+            <input id="nickname" maxlength="18" autocomplete="off" placeholder="Ex.: Lgods" />
+            <span>Seu nome aparecerá no ranking de vitórias.</span>
+          </div>
+          <!-- Tower progress -->
+          <div class="tower-preview" id="towerPreview">
+            <div class="tower-preview-title">🗼 TORRE DA FLORESTA</div>
+            <div class="tower-steps" id="towerSteps"></div>
+          </div>
+          <div class="choice-grid">
+            <button class="character-card goblin" data-player="goblin" data-mode="pve">
+              <div class="avatar char-svg-sm" id="cardSvg_pve_goblin"></div>
+              <h2>Gobblin</h2>
+              <span>Guerreiro · +2 Ataque</span>
+              <strong>100 HP</strong>
+            </button>
+            <button class="character-card hunter" data-player="hunter" data-mode="pve">
+              <div class="avatar char-svg-sm" id="cardSvg_pve_hunter"></div>
+              <h2>Hunter</h2>
+              <span>Arqueiro · +1 Dado</span>
+              <strong>100 HP</strong>
+            </button>
+            <button class="character-card mago" data-player="mago" data-mode="pve">
+              <div class="avatar char-svg-sm" id="cardSvg_pve_mago"></div>
+              <h2>Mago</h2>
+              <span>Arcano · +3 Magia</span>
+              <strong>85 HP</strong>
+            </button>
+            <button class="character-card tank" data-player="tank" data-mode="pve">
+              <div class="avatar char-svg-sm" id="cardSvg_pve_tank"></div>
+              <h2>Tank</h2>
+              <span>Guardião · +3 Defesa</span>
+              <strong>130 HP</strong>
+            </button>
+          </div>
+          <!-- Player gear display -->
+          <div class="gear-preview" id="gearPreview"></div>
+        </div>
+
+        <!-- PvP setup -->
+        <div id="pvpSetup" class="setup-block hidden">
+          <div class="pvp-players">
+            <div class="pvp-player-col">
+              <div class="nickname-box">
+                <label for="nickname1">JOGADOR 1</label>
+                <input id="nickname1" maxlength="18" autocomplete="off" placeholder="Ex.: Lgods" />
+              </div>
+              <div class="choice-grid single">
+                <button class="character-card goblin" data-player="goblin" data-mode="pvp" data-slot="1">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp1_goblin"></div><h2>Gobblin</h2>
+                  <span>+2 Ataque</span><strong>100 HP</strong>
+                </button>
+                <button class="character-card hunter" data-player="hunter" data-mode="pvp" data-slot="1">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp1_hunter"></div><h2>Hunter</h2>
+                  <span>+1 Dado</span><strong>100 HP</strong>
+                </button>
+                <button class="character-card mago" data-player="mago" data-mode="pvp" data-slot="1">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp1_mago"></div><h2>Mago</h2>
+                  <span>+3 Magia</span><strong>85 HP</strong>
+                </button>
+                <button class="character-card tank" data-player="tank" data-mode="pvp" data-slot="1">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp1_tank"></div><h2>Tank</h2>
+                  <span>+3 Defesa</span><strong>130 HP</strong>
+                </button>
+              </div>
+            </div>
+            <div class="pvp-vs">VS</div>
+            <div class="pvp-player-col">
+              <div class="nickname-box">
+                <label for="nickname2">JOGADOR 2</label>
+                <input id="nickname2" maxlength="18" autocomplete="off" placeholder="Ex.: Xablau" />
+              </div>
+              <div class="choice-grid single">
+                <button class="character-card goblin" data-player="goblin" data-mode="pvp" data-slot="2">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp2_goblin"></div><h2>Gobblin</h2>
+                  <span>+2 Ataque</span><strong>100 HP</strong>
+                </button>
+                <button class="character-card hunter" data-player="hunter" data-mode="pvp" data-slot="2">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp2_hunter"></div><h2>Hunter</h2>
+                  <span>+1 Dado</span><strong>100 HP</strong>
+                </button>
+                <button class="character-card mago" data-player="mago" data-mode="pvp" data-slot="2">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp2_mago"></div><h2>Mago</h2>
+                  <span>+3 Magia</span><strong>85 HP</strong>
+                </button>
+                <button class="character-card tank" data-player="tank" data-mode="pvp" data-slot="2">
+                  <div class="avatar char-svg-sm" id="cardSvg_pvp2_tank"></div><h2>Tank</h2>
+                  <span>+3 Defesa</span><strong>130 HP</strong>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="pvp-start-row">
+            <button id="pvpStartBtn" class="attack-btn pvp-start-btn" onclick="startPvP()">⚔ Iniciar Duelo</button>
+          </div>
+        </div>
+
+        <p class="hint">Derrote inimigos para ganhar moedas e comprar equipamentos na Loja!</p>
+      </section>
+
+      <!-- ===== SHOP SCREEN ===== -->
+      <section id="shop" class="screen shop-screen">
+        <header class="shop-header">
+          <div>
+            <span class="eyebrow">🛒 FLORESTA DOS DADOS</span>
+            <h1>Loja do Aventureiro</h1>
+            <p class="shop-wallet">🪙 <span id="shopWallet">0</span> moedas disponíveis</p>
+          </div>
+          <button class="secondary-btn" onclick="closeShop()">✕ Fechar</button>
+        </header>
+
+        <div class="shop-body">
+          <!-- Equipamentos equipados -->
+          <div class="equipped-panel">
+            <div class="shop-section-title">🧙 EQUIPAMENTOS ATIVOS</div>
+            <div id="equippedList" class="equipped-list"></div>
+            <div class="equipped-note">Itens só valem no PvE. Se morrer, perde tudo.</div>
+          </div>
+
+          <!-- Itens à venda -->
+          <div class="shop-items-wrap">
+            <div class="shop-section-title">⚔️ ESPADAS</div>
+            <div class="shop-grid">
+              <div class="shop-item" data-item="sword_common">
+                <div class="shop-item-icon">⚔️</div>
+                <div class="shop-item-info">
+                  <b>Espada Comum</b>
+                  <span>+2 de dano por ataque</span>
+                  <em class="rarity common">COMUM</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 60</div>
+                  <button class="shop-buy-btn" onclick="buyItem('sword_common')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="sword_rare">
+                <div class="shop-item-icon">🗡️</div>
+                <div class="shop-item-info">
+                  <b>Espada Rara</b>
+                  <span>+5 de dano por ataque</span>
+                  <em class="rarity rare">RARA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 230</div>
+                  <button class="shop-buy-btn" onclick="buyItem('sword_rare')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="sword_legendary">
+                <div class="shop-item-icon">🔱</div>
+                <div class="shop-item-info">
+                  <b>Espada Lendária</b>
+                  <span>+8 de dano por ataque</span>
+                  <em class="rarity legendary">LENDÁRIA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 500</div>
+                  <button class="shop-buy-btn" onclick="buyItem('sword_legendary')">COMPRAR</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="shop-section-title">🛡️ ARMADURAS</div>
+            <div class="shop-grid">
+              <div class="shop-item" data-item="armor_common">
+                <div class="shop-item-icon">🥋</div>
+                <div class="shop-item-info">
+                  <b>Armadura Comum</b>
+                  <span>+5 defesa &amp; +2 HP</span>
+                  <em class="rarity common">COMUM</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 60</div>
+                  <button class="shop-buy-btn" onclick="buyItem('armor_common')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="armor_rare">
+                <div class="shop-item-icon">🦺</div>
+                <div class="shop-item-info">
+                  <b>Armadura Rara</b>
+                  <span>+8 defesa &amp; +5 HP</span>
+                  <em class="rarity rare">RARA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 230</div>
+                  <button class="shop-buy-btn" onclick="buyItem('armor_rare')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="armor_legendary">
+                <div class="shop-item-icon">⚜️</div>
+                <div class="shop-item-info">
+                  <b>Armadura Lendária</b>
+                  <span>+10 defesa &amp; +12 HP</span>
+                  <em class="rarity legendary">LENDÁRIA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 500</div>
+                  <button class="shop-buy-btn" onclick="buyItem('armor_legendary')">COMPRAR</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="shop-section-title">✨ CONSUMÍVEIS &amp; ESPECIAIS</div>
+            <div class="shop-grid">
+              <div class="shop-item" data-item="potion_epic">
+                <div class="shop-item-icon">💊</div>
+                <div class="shop-item-info">
+                  <b>Poção Épica</b>
+                  <span>+10 HP (uso em batalha)</span>
+                  <em class="rarity epic">ÉPICA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 60</div>
+                  <button class="shop-buy-btn" onclick="buyItem('potion_epic')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="dex_card">
+                <div class="shop-item-icon">🃏</div>
+                <div class="shop-item-info">
+                  <b>Carta de Destreza</b>
+                  <span>+2 pontos fixos no dado</span>
+                  <em class="rarity rare">RARA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 230</div>
+                  <button class="shop-buy-btn" onclick="buyItem('dex_card')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="super_potion">
+                <div class="shop-item-icon">🧬</div>
+                <div class="shop-item-info">
+                  <b>Super Poção</b>
+                  <span>Restaura 100% da vida (uso em batalha)</span>
+                  <em class="rarity legendary">LENDÁRIA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 500</div>
+                  <button class="shop-buy-btn" onclick="buyItem('super_potion')">COMPRAR</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="shop-section-title">📚 LIVROS MÁGICOS <span class="shop-note">(Mago)</span></div>
+            <div class="shop-grid">
+              <div class="shop-item" data-item="tome_common">
+                <div class="shop-item-icon">📗</div>
+                <div class="shop-item-info">
+                  <b>Livro Mágico Comum</b>
+                  <span>+2 dano mágico (só Mago)</span>
+                  <em class="rarity common">COMUM</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 60</div>
+                  <button class="shop-buy-btn" onclick="buyItem('tome_common')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="tome_rare">
+                <div class="shop-item-icon">📘</div>
+                <div class="shop-item-info">
+                  <b>Livro Mágico Raro</b>
+                  <span>+5 dano mágico (só Mago)</span>
+                  <em class="rarity rare">RARA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 230</div>
+                  <button class="shop-buy-btn" onclick="buyItem('tome_rare')">COMPRAR</button>
+                </div>
+              </div>
+              <div class="shop-item" data-item="tome_legendary">
+                <div class="shop-item-icon">📙</div>
+                <div class="shop-item-info">
+                  <b>Livro Mágico Lendário</b>
+                  <span>+8 dano mágico (só Mago)</span>
+                  <em class="rarity legendary">LENDÁRIA</em>
+                </div>
+                <div class="shop-item-right">
+                  <div class="shop-price">🪙 500</div>
+                  <button class="shop-buy-btn" onclick="buyItem('tome_legendary')">COMPRAR</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== BATTLE SCREEN ===== -->
+      <section id="battle" class="screen battle-screen">
+
+        <header class="battle-header">
+          <div>
+            <span class="eyebrow">🌲 FLORESTA DOS DADOS</span>
+            <h1>Duelo D20</h1>
+            <div class="player-tag">👤 <span id="battleNickname">Jogador</span> &nbsp;|&nbsp; 🪙 <span id="battleWallet">0</span></div>
+          </div>
+          <!-- Tower progress in header -->
+          <div id="towerProgress" class="tower-progress hidden"></div>
+          <button id="restartBtn" class="secondary-btn">↻ Abandonar</button>
+        </header>
+
+        <div id="turnBanner" class="turn-banner">Seu turno — ataque!</div>
+
+        <div class="battle-body">
+          <!-- CENTER: arena + log + actions -->
+          <div class="battle-center">
+            <div class="arena">
+              <div class="mist mist-a"></div><div class="mist mist-b"></div>
+              <div class="moon">☾</div>
+              <div class="tree tree-1">🌲</div><div class="tree tree-2">🌲</div>
+              <div class="tree tree-3">🌲</div><div class="tree tree-4">🌲</div>
+              <div class="ground"></div>
+
+              <div id="player" class="fighter left">
+                <div class="health-card">
+                  <div class="name-row"><strong id="playerName">Gobblin</strong><span id="playerHp">100/100</span></div>
+                  <div class="bar"><i id="playerBar"></i></div>
+                </div>
+                <div class="fighter-art" id="playerArt">👺</div>
+                <div class="shadow"></div>
+                <div id="playerStatus" class="status-effects"></div>
+              </div>
+
+              <div class="vs">VS</div>
+
+              <div id="enemy" class="fighter right">
+                <div class="health-card">
+                  <div class="name-row"><strong id="enemyName">?</strong><span id="enemyHp">?/?</span></div>
+                  <div class="bar"><i id="enemyBar"></i></div>
+                </div>
+                <div class="fighter-art" id="enemyArt">👹</div>
+                <div class="shadow"></div>
+                <div id="enemyStatus" class="status-effects"></div>
+              </div>
+
+              <div id="damageFloat" class="damage-float"></div>
+              <div id="itemFloat" class="item-float"></div>
+
+              <div id="dice" class="dice-wrap" aria-label="Dado D20">
+                <div class="dice-scene">
+                  <div class="dice-icosa" id="diceIcosa">
+                    <svg class="dice-svg" id="diceSvg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+                    <span class="dice-number" id="diceValue">?</span>
+                  </div>
+                </div>
+                <small class="dice-label">D20</small>
+              </div>
+            </div>
+
+            <!-- Log + actions -->
+            <div class="battle-controls">
+              <div class="combat-log" id="combatLog">
+                <div class="log-title">📜 Registro de combate</div>
+                <div id="logEntries" class="log-entries"></div>
+              </div>
+
+              <div class="action-area">
+                <div class="turn-label" id="turnLabel">SEU TURNO</div>
+                <div class="action-grid">
+                  <button id="attackBtn" class="attack-btn"><span>⚔</span> ATACAR</button>
+                  <button id="fleeBtn" class="flee-btn"><span>🏃</span> FUGIR</button>
+                </div>
+                <div class="turn-timer-row">
+                  <div id="turnTimer" class="turn-timer"></div>
+                  <p id="actionHint">Role o D20 e descubra o dano.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDEBAR: inventories + gear -->
+          <aside class="items-panel">
+            <div class="items-panel-title">🎒 ITENS DE BATALHA</div>
+
+            <!-- Player gear stats (PvE only) -->
+            <div class="gear-stats-panel" id="gearStatsPanel"></div>
+
+            <!-- Player 1 inventory -->
+            <div class="inv-block" id="p1InvBlock">
+              <div class="inv-block-label player-label">
+                <span class="inv-dot dot-green"></span>
+                <span id="inventoryOwnerLabel">SEU INVENTÁRIO</span>
+              </div>
+              <div class="inv-grid">
+                <button class="inv-item-btn" data-item="shield" id="shieldBtn">
+                  <span class="inv-icon">🛡️</span>
+                  <span class="inv-name">Escudo</span>
+                  <span class="inv-desc">Bloqueia 1 ataque</span>
+                  <em class="inv-count" id="shieldCount">0</em>
+                </button>
+                <button class="inv-item-btn" data-item="potion" id="potionBtn">
+                  <span class="inv-icon">🧪</span>
+                  <span class="inv-name">Poção</span>
+                  <span class="inv-desc">+5 HP</span>
+                  <em class="inv-count" id="potionCount">0</em>
+                </button>
+                <button class="inv-item-btn" data-item="powder" id="powderBtn">
+                  <span class="inv-icon">✨</span>
+                  <span class="inv-name">Pó Mágico</span>
+                  <span class="inv-desc">Cega inimigo</span>
+                  <em class="inv-count" id="powderCount">0</em>
+                </button>
+                <!-- Epic potion from shop (PvE) -->
+                <button class="inv-item-btn" data-item="potion_epic" id="epicPotionBtn">
+                  <span class="inv-icon">💊</span>
+                  <span class="inv-name">Poção Épica</span>
+                  <span class="inv-desc">+10 HP</span>
+                  <em class="inv-count" id="epicPotionCount">0</em>
+                </button>
+                <!-- Super potion from shop (PvE) -->
+                <button class="inv-item-btn" data-item="super_potion" id="superPotionBtn">
+                  <span class="inv-icon">🧬</span>
+                  <span class="inv-name">Super Poção</span>
+                  <span class="inv-desc">HP 100%</span>
+                  <em class="inv-count" id="superPotionCount">0</em>
+                </button>
+              </div>
+            </div>
+
+            <div class="inv-divider"></div>
+
+            <!-- Enemy inventory -->
+            <div class="inv-block enemy-inv-block" id="enemyInventory">
+              <div class="inv-block-label enemy-label">
+                <span class="inv-dot dot-red"></span>
+                <span id="enemyInventoryLabel">INIMIGO</span>
+              </div>
+              <div class="inv-grid">
+                <button class="inv-item-btn no-action" id="eShieldBtn">
+                  <span class="inv-icon">🛡️</span>
+                  <span class="inv-name">Escudo</span>
+                  <span class="inv-desc">Bloqueia 1 ataque</span>
+                  <em class="inv-count" id="eShieldCount">0</em>
+                </button>
+                <button class="inv-item-btn no-action" id="ePotionBtn">
+                  <span class="inv-icon">🧪</span>
+                  <span class="inv-name">Poção</span>
+                  <span class="inv-desc">+5 HP</span>
+                  <em class="inv-count" id="ePotionCount">0</em>
+                </button>
+                <button class="inv-item-btn no-action" id="ePowderBtn">
+                  <span class="inv-icon">✨</span>
+                  <span class="inv-name">Pó Mágico</span>
+                  <span class="inv-desc">Cega oponente</span>
+                  <em class="inv-count" id="ePowderCount">0</em>
+                </button>
+              </div>
+            </div>
+
+            <!-- Item legend -->
+            <div class="inv-legend">
+              <div class="legend-title">📖 REGRAS</div>
+              <div class="legend-row"><span class="legend-badge">15–19</span> Chance de item</div>
+              <div class="legend-row"><span class="legend-badge nat20">20</span> Crítico + item</div>
+              <div class="legend-row"><span class="legend-badge flee">16+</span> Fuga OK</div>
+              <div class="legend-row"><span class="legend-badge dmg">&lt;16</span> Fuga: −5 HP</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===== BETWEEN-FIGHT SCREEN (PvE torre) ===== -->
+      <section id="between" class="screen result-screen">
+        <div class="result-icon" id="betweenIcon">⚔️</div>
+        <span class="eyebrow">INIMIGO DERROTADO</span>
+        <h1 id="betweenTitle">Vitória!</h1>
+        <p id="betweenText"></p>
+        <div class="between-coins" id="betweenCoins"></div>
+        <div class="between-btns">
+          <button class="attack-btn" id="nextFightBtn" onclick="nextTowerFight()">⚔ Próximo Inimigo</button>
+          <button class="secondary-btn checkpoint-leave hidden" id="checkpointLeaveBtn" onclick="leaveTowerAtCheckpoint()">🏅 Sair e Salvar</button>
+          <button class="secondary-btn" onclick="openShopFromBattle()">🛒 Ir à Loja</button>
+        </div>
+      </section>
+
+      <!-- ===== RESULT SCREEN ===== -->
+      <section id="result" class="screen result-screen">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <span class="eyebrow">COMBATE ENCERRADO</span>
+        <h1 id="resultTitle">Vitória!</h1>
+        <p id="resultText"></p>
+        <div class="result-coins" id="resultCoins"></div>
+        <button id="againBtn" class="attack-btn">⚔ Jogar novamente</button>
+      </section>
+
+    </div><!-- /content-wrap -->
+  </main>
+  <script src="script.js"></script>
+  <script>
+    // Preencher SVGs nos cards de personagem ao carregar
+    (function() {
+      const slots = [
+        ['cardSvg_pve_goblin','goblin'],['cardSvg_pve_hunter','hunter'],
+        ['cardSvg_pve_mago','mago'],['cardSvg_pve_tank','tank'],
+        ['cardSvg_pvp1_goblin','goblin'],['cardSvg_pvp1_hunter','hunter'],
+        ['cardSvg_pvp1_mago','mago'],['cardSvg_pvp1_tank','tank'],
+        ['cardSvg_pvp2_goblin','goblin'],['cardSvg_pvp2_hunter','hunter'],
+        ['cardSvg_pvp2_mago','mago'],['cardSvg_pvp2_tank','tank']
+      ];
+      slots.forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = charSvg(key);
+      });
+    })();
+  </script>
+</body>
+</html>
